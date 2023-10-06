@@ -1,5 +1,6 @@
 package com.atb.mynotes.presentation.note_list
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,12 +12,15 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atb.mynotes.core.components.NoteFloatingBtn
 import com.atb.mynotes.core.components.NoteTopBar
@@ -52,30 +56,41 @@ fun NoteListScreen(
         modifier = modifier
             .fillMaxSize()
     ) {innerPadding ->
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding)
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            items(items = state.value.notes) {note ->
-                NoteListItem(
-                    note = note,
-                    onNoteClick = { onNoteClick(note) },
-                    onDeleteClick = {
-                        viewModel.deleteNote(it)
-                        scope.launch {
-                            val result = snackbarHostState
-                                .showSnackbar(
-                                    message = "Do you want to restore your note ?",
-                                    actionLabel = "Yes",
-                                    duration = SnackbarDuration.Short
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                items(items = state.value.notes) {note ->
+                    NoteListItem(
+                        note = note,
+                        onNoteClick = { onNoteClick(note) },
+                        onDeleteClick = {
+                            viewModel.deleteNote(it)
+                            scope.launch {
+                                val result = snackbarHostState
+                                    .showSnackbar(
+                                        message = "Do you want to restore your note ?",
+                                        actionLabel = "Yes",
+                                        duration = SnackbarDuration.Short
 
-                                )
-                            if (result == SnackbarResult.ActionPerformed) {
-                                viewModel.restoreRecentDeletedNote()
+                                    )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    viewModel.restoreRecentDeletedNote()
+                                }
                             }
-                        }
-                    },
-                    modifier = Modifier.padding(8.dp)
-                )
+                        },
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+
+            if (state.value.notes.isEmpty()) {
+                Text(text = "Empty", fontSize = 24.sp)
             }
         }
     }
